@@ -8,6 +8,7 @@
     </parent>
     <groupId>org.brutusin</groupId>
     <artifactId>commons</artifactId>
+    <packaging>jar</packaging>   
     <version>1.0.1-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Brutusin common utilities</description>
