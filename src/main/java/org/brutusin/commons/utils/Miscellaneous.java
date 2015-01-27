@@ -18,6 +18,8 @@ package org.brutusin.commons.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public final class Miscellaneous {
@@ -68,6 +70,14 @@ public final class Miscellaneous {
         Throwable root = ExceptionUtils.getRootCause(th);
         root = root == null ? th : root;
         return root.getMessage();
+    }
+    
+    public static <T> List<T> createList(T... elements){
+        ArrayList<T> ret = new ArrayList(elements.length);
+        for (int i = 0; i < elements.length; i++) {
+            ret.add(elements[i]);
+        }
+        return ret;
     }
 
     public static void main(String[] args) {
