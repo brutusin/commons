@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -36,6 +37,7 @@ import java.io.IOException;
 public final class JsonHelper {
 
     private final ObjectMapper mapper;
+    private final SchemaFactoryWrapper schemaFactory;
     private final SchemaHelper schemaHelper = new SchemaHelper();
     private final DataHelper dataHelper = new DataHelper();
 
@@ -46,15 +48,28 @@ public final class JsonHelper {
     }
     
     public JsonHelper() {
-        this(null);
+        this(null, null);
+    }
+    
+    public JsonHelper(ObjectMapper mapper) {
+        this(mapper, null);
+    }
+    
+    public JsonHelper(SchemaFactoryWrapper schemaFactory) {
+        this(null, schemaFactory);
     }
 
-    public JsonHelper(ObjectMapper mapper) {
+    public JsonHelper(ObjectMapper mapper, SchemaFactoryWrapper schemaFactory) {
         if (mapper == null) {
             this.mapper = new ObjectMapper();
             this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         } else {
             this.mapper = mapper;
+        }
+        if (schemaFactory == null) {
+            this.schemaFactory = new SchemaFactoryWrapper();
+        } else {
+            this.schemaFactory = schemaFactory;
         }
     }
 
@@ -101,9 +116,8 @@ public final class JsonHelper {
         public String getSchemaString(Class<?> clazz, String title, String description) {
             try {
                 String ret;
-                SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
-                mapper.acceptJsonFormatVisitor(mapper.constructType(clazz), visitor);
-                com.fasterxml.jackson.module.jsonSchema.JsonSchema finalSchema = visitor.finalSchema();
+                mapper.acceptJsonFormatVisitor(mapper.constructType(clazz), schemaFactory);
+                com.fasterxml.jackson.module.jsonSchema.JsonSchema finalSchema = schemaFactory.finalSchema();
                 ret = mapper.writeValueAsString(finalSchema);
                 if (ret != null && (title != null || description != null)) {
                     StringBuilder sb = new StringBuilder(ret.trim());
