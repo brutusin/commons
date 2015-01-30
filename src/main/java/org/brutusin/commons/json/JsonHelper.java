@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -35,26 +34,26 @@ import java.io.IOException;
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 public final class JsonHelper {
+    
+    private static final JsonHelper instance = new JsonHelper();
 
     private final ObjectMapper mapper;
     private final SchemaFactoryWrapper schemaFactory;
     private final SchemaHelper schemaHelper = new SchemaHelper();
     private final DataHelper dataHelper = new DataHelper();
 
-    private static final JsonHelper instance = new JsonHelper();
-    
-    public static JsonHelper getDefaultInstance(){
+    public static JsonHelper getDefaultInstance() {
         return instance;
     }
-    
+
     public JsonHelper() {
         this(null, null);
     }
-    
+
     public JsonHelper(ObjectMapper mapper) {
         this(mapper, null);
     }
-    
+
     public JsonHelper(SchemaFactoryWrapper schemaFactory) {
         this(null, schemaFactory);
     }
@@ -196,43 +195,5 @@ public final class JsonHelper {
                 throw new RuntimeException(json, ex);
             }
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        A a = new A();
-        B b = new B();
-
-        a.setB(b);
-        b.setA(a);
-        
-        System.out.println(JsonHelper.getDefaultInstance().getDataHelper().transform(a));
-
-    }
-}
-
-class A {
-
-    private B b;
-
-    public B getB() {
-        return b;
-    }
-
-    public void setB(B b) {
-        this.b = b;
-    }
-}
-
-class B {
-
-    private A a;
-
-    public A getA() {
-        return a;
-    }
-
-    public void setA(A a) {
-        this.a = a;
     }
 }
