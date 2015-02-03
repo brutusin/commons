@@ -15,24 +15,28 @@
  */
 package org.brutusin.commons.json;
 
-import java.util.List;
-
 /**
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public class ValidationException extends Exception {
+public class ParseException extends Exception{
 
-    private final List<String> messages;
-
-    public ValidationException(List<String> messages) {
-        if (messages == null || messages.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-        this.messages = messages;
+    public ParseException() {
     }
 
-    public List<String> getMessages() {
-        return messages;
+    public ParseException(String message) {
+        super(message);
+    }
+
+    public ParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ParseException(Throwable cause) {
+        super(cause);
+    }
+
+    public ParseException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }
