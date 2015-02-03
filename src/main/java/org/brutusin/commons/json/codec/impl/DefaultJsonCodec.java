@@ -105,9 +105,8 @@ public class DefaultJsonCodec implements JsonCodec {
         }
         com.github.fge.jsonschema.main.JsonSchema schemaImpl = ((DefaultJsonCodec.JsonSchemaImpl) schema).getImpl();
         ProcessingReport report = null;
-        JsonNode node = parse(json);
         try {
-            report = schemaImpl.validate(node);
+            report = schemaImpl.validate(parse(json));
         } catch (ProcessingException ex) {
             throw new ParseException(ex);
         }
