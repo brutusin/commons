@@ -55,7 +55,7 @@ public class Pair<K, V> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof Pair)) {
+        if (!(obj instanceof Pair)) {
             return false;
         }
         Pair other = (Pair) obj;

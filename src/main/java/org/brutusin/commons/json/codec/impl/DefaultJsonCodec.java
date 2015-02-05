@@ -106,9 +106,6 @@ public class DefaultJsonCodec implements JsonCodec {
     }
 
     public void validate(JsonSchema schema, String json) throws ValidationException, ParseException {
-        if (schema == null) {
-            throw new IllegalArgumentException("schema cannot be null");
-        }
         if (!(schema instanceof DefaultJsonCodec.JsonSchemaImpl)) {
             throw new IllegalArgumentException("schema has to be instance of " + DefaultJsonCodec.JsonSchemaImpl.class.getName());
         }
