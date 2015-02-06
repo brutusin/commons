@@ -19,10 +19,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.module.jsonSchema.factories.FormatVisitorFactory;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
+import com.fasterxml.jackson.module.jsonSchema.factories.WrapperFactory;
+import com.fasterxml.jackson.module.jsonSchema.types.AnySchema;
+import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
+import com.fasterxml.jackson.module.jsonSchema.types.BooleanSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.IntegerSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.NullSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.NumberSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.SimpleTypeSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -54,7 +68,7 @@ public class DefaultJsonCodec implements JsonCodec {
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
         if (schemaFactory == null) {
-            schemaFactory = new SchemaFactoryWrapper();
+            schemaFactory = new JsonsrvFactoryWrapper();
         }
         this.mapper = mapper;
         this.schemaFactory = schemaFactory;
@@ -141,6 +155,9 @@ public class DefaultJsonCodec implements JsonCodec {
         }
     }
 
+    /**
+     * @author Ignacio del Valle Alles idelvall@brutusin.org
+     */
     private static class JsonSchemaImpl implements JsonSchema {
 
         private com.github.fge.jsonschema.main.JsonSchema impl;
@@ -151,6 +168,128 @@ public class DefaultJsonCodec implements JsonCodec {
 
         public void setImpl(com.github.fge.jsonschema.main.JsonSchema impl) {
             this.impl = impl;
+        }
+    }
+
+    /**
+     * @author Ignacio del Valle Alles idelvall@brutusin.org
+     */
+    private static class JsonsrvFactoryWrapper extends SchemaFactoryWrapper {
+
+        private final WrapperFactory wrapperFactory = new WrapperFactory() {
+            @Override
+            public SchemaFactoryWrapper getWrapper(SerializerProvider p) {
+                return new JsonsrvFactoryWrapper(p);
+            }
+
+            @Override
+            public SchemaFactoryWrapper getWrapper(SerializerProvider provider, VisitorContext rvc) {
+                JsonsrvFactoryWrapper wrapper = new JsonsrvFactoryWrapper(provider);
+                wrapper.setVisitorContext(rvc);
+                return wrapper;
+            }
+
+        };
+
+        public JsonsrvFactoryWrapper() {
+            this(null);
+        }
+
+        public JsonsrvFactoryWrapper(SerializerProvider p) {
+            super(p);
+            visitorFactory = new FormatVisitorFactory(wrapperFactory);
+            schemaProvider = new JsonsrvSchemaFactory();
+        }
+
+    }
+
+    /**
+     * @author Ignacio del Valle Alles idelvall@brutusin.org
+     */
+    private static class JsonsrvSchemaFactory extends com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory {
+
+        void enrich(SimpleTypeSchema schema, BeanProperty beanProperty) {
+            schema.setTitle(beanProperty.getName());
+        }
+
+        @Override
+        public AnySchema anySchema() {
+            return new AnySchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public ArraySchema arraySchema() {
+            return new ArraySchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public BooleanSchema booleanSchema() {
+            return new BooleanSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public IntegerSchema integerSchema() {
+            return new IntegerSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public NullSchema nullSchema() {
+            return new NullSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public NumberSchema numberSchema() {
+            return new NumberSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public ObjectSchema objectSchema() {
+            return new ObjectSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
+        }
+
+        @Override
+        public StringSchema stringSchema() {
+            return new StringSchema() {
+                @Override
+                public void enrichWithBeanProperty(BeanProperty beanProperty) {
+                    enrich(this, beanProperty);
+                }
+            };
         }
     }
 
