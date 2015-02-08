@@ -1,7 +1,7 @@
 #org.brutusin:commons [![Build Status](https://api.travis-ci.org/brutusin/commons.svg?branch=master)](https://travis-ci.org/brutusin/commons) [![Maven Central Latest Version](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/)
 Common utilities project. General purpose functionality used by other projects.
 
-## Man subcomponents:
+## Main subcomponents:
 ### `FifoTaskExecutor`
 [FifoTaskExecutor](src/main/java/org/brutusin/commons/concurrent/FifoTaskExecutor.java)
 
