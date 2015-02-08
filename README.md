@@ -5,8 +5,8 @@ Common utilities project. General purpose functionality used by other projects.
 
 * [FifoTaskExecutor](src/main/java/org/brutusin/commons/concurrent/FifoTaskExecutor.java): Parallelizes the processing of an ordered input collection, keeping the order in the output.
 * [JSON SPI](src/main/java/org/brutusin/commons/json/spi): A service provider interface ([SPI](http://en.wikipedia.org/wiki/Service_provider_interface)) that defines all the JSON-related functionality needed by the rest of Brutusin modules, allowing to use different pluggable implementations (service providers) and decoupling client modules from them. 
-  * See [json-codec-jackson](https://github.com/brutusin/json-codec-jackson), the default JSON service provider.
   * See [ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) for more details.
+  * See also [json-codec-jackson](https://github.com/brutusin/json-codec-jackson), the default JSON service provider.
 
 ## Support bugs and requests
 https://github.com/brutusin/commons/issues
