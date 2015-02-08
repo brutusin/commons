@@ -25,27 +25,27 @@ import java.util.ServiceLoader;
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public abstract class JsonService implements JsonDataService, JsonSchemaService {
+public abstract class JsonCodec implements JsonDataCodec, JsonSchemaCodec {
 
-    private static JsonService instance;
+    private static JsonCodec instance;
 
     static {
-        ServiceLoader<JsonService> sl = ServiceLoader.load(JsonService.class);
-        Iterator<JsonService> it = sl.iterator();
-        List<JsonService> instances = new ArrayList<JsonService>();
+        ServiceLoader<JsonCodec> sl = ServiceLoader.load(JsonCodec.class);
+        Iterator<JsonCodec> it = sl.iterator();
+        List<JsonCodec> instances = new ArrayList<JsonCodec>();
         while (it.hasNext()) {
             instances.add(it.next());
         }
         if (instances.size() == 0) {
-            throw new Error("No '" + JsonService.class.getSimpleName() + "' service provider found.");
+            throw new Error("No '" + JsonCodec.class.getSimpleName() + "' service provider found.");
         } else if (instances.size() > 1) {
-            throw new Error("Multiple '" + JsonService.class.getSimpleName() + "' service providers found: " + instances);
+            throw new Error("Multiple '" + JsonCodec.class.getSimpleName() + "' service providers found: " + instances);
         } else {
             instance = instances.get(0);
         }
     }
 
-    public static JsonService getInstance() {
+    public static JsonCodec getInstance() {
         return instance;
     }
 }

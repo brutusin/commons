@@ -21,7 +21,7 @@ import org.brutusin.commons.json.ValidationException;
 /**
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public interface JsonSchemaService {
+public interface JsonSchemaCodec {
     
     public String getSchema(Class clazz);
     

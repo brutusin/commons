@@ -18,7 +18,7 @@ package org.brutusin.commons.json;
 
 import org.brutusin.commons.json.spi.JsonSchema;
 import org.brutusin.commons.json.spi.JsonNode;
-import org.brutusin.commons.json.spi.JsonService;
+import org.brutusin.commons.json.spi.JsonCodec;
 
 /**
  *
@@ -28,7 +28,7 @@ public final class JsonHelper {
 
     private static final JsonHelper instance = new JsonHelper();
 
-    private final JsonService codec;
+    private final JsonCodec codec;
     private final SchemaHelper schemaHelper = new SchemaHelper();
     private final DataHelper dataHelper = new DataHelper();
 
@@ -40,9 +40,9 @@ public final class JsonHelper {
         this(null);
     }
 
-    public JsonHelper(JsonService codec) {
+    public JsonHelper(JsonCodec codec) {
         if (codec == null) {
-            codec = JsonService.getInstance();
+            codec = JsonCodec.getInstance();
         }
         this.codec = codec;
     }

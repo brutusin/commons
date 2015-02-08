@@ -20,7 +20,7 @@ import org.brutusin.commons.json.ParseException;
 /**
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public interface JsonDataService {
+public interface JsonDataCodec {
     
     public String quoteAsUTF8(String s);
 
