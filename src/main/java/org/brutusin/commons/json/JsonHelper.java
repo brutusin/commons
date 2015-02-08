@@ -28,23 +28,14 @@ public final class JsonHelper {
 
     private static final JsonHelper instance = new JsonHelper();
 
-    private final JsonCodec codec;
+    private static final JsonCodec codec = JsonCodec.getInstance();
     private final SchemaHelper schemaHelper = new SchemaHelper();
     private final DataHelper dataHelper = new DataHelper();
 
-    public static JsonHelper getDefaultInstance() {
+    private JsonHelper(){}
+    
+    public static JsonHelper getInstance() {
         return instance;
-    }
-
-    public JsonHelper() {
-        this(null);
-    }
-
-    public JsonHelper(JsonCodec codec) {
-        if (codec == null) {
-            codec = JsonCodec.getInstance();
-        }
-        this.codec = codec;
     }
 
     public SchemaHelper getSchemaHelper() {
