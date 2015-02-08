@@ -13,12 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.brutusin.commons.json;
+package org.brutusin.commons.json.spi;
+
+import java.util.Iterator;
 
 /**
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 public interface JsonNode {
-    
+
+    public enum Type {
+
+        OBJECT,
+        ARRAY,
+        BOOLEAN,
+        NULL,
+        NUMBER,
+        STRING,
+        ANY
+    }
+
+    public Type getNodeType();
+
+    public Boolean asBoolean();
+
+    public Integer asInteger();
+
+    public Long asLong();
+
+    public Double asDouble();
+
+    public String asString();
+
+    public int getSize();
+
+    public JsonNode get(int i);
+
+    public Iterator<String> getProperties();
+
+    public JsonNode get(String property);
+
 }

@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.brutusin.commons.json;
+package org.brutusin.commons.json.spi;
+
+import org.brutusin.commons.json.ValidationException;
 
 /**
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 public interface JsonSchema {
-    
+
+    public void validate(JsonNode node) throws ValidationException;
 }

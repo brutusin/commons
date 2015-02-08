@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.brutusin.commons.json.codec;
+package org.brutusin.commons.json.spi;
 
 import org.brutusin.commons.json.ParseException;
 
 /**
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public interface JsonDataCodec {
+public interface JsonDataService {
     
     public String quoteAsUTF8(String s);
 
-    public <T> T transform(String json, Class<T> clazz) throws ParseException;
+    public <T> T parse(String json, Class<T> clazz) throws ParseException;
+    
+    public JsonNode parse(String json) throws ParseException;
 
     public String transform(Object o);
 }

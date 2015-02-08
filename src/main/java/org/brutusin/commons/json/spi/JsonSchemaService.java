@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.brutusin.commons.json.codec;
+package org.brutusin.commons.json.spi;
 
-import org.brutusin.commons.json.JsonSchema;
 import org.brutusin.commons.json.ParseException;
 import org.brutusin.commons.json.ValidationException;
 
 /**
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public interface JsonSchemaCodec {
+public interface JsonSchemaService {
     
     public String getSchema(Class clazz);
     
     public JsonSchema parseSchema(String json) throws ParseException;
 
-    public void validate(JsonSchema schema, String data) throws ValidationException, ParseException;
 }

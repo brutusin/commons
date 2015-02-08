@@ -34,14 +34,6 @@
    
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jsonSchema</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.fge</groupId>
-            <artifactId>json-schema-validator</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>

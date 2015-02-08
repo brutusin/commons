@@ -16,8 +16,9 @@
 package org.brutusin.commons.json;
 
 
-import org.brutusin.commons.json.codec.JsonCodec;
-import org.brutusin.commons.json.codec.impl.DefaultJsonCodec;
+import org.brutusin.commons.json.spi.JsonSchema;
+import org.brutusin.commons.json.spi.JsonNode;
+import org.brutusin.commons.json.spi.JsonService;
 
 /**
  *
@@ -27,7 +28,7 @@ public final class JsonHelper {
 
     private static final JsonHelper instance = new JsonHelper();
 
-    private final JsonCodec codec;
+    private final JsonService codec;
     private final SchemaHelper schemaHelper = new SchemaHelper();
     private final DataHelper dataHelper = new DataHelper();
 
@@ -39,9 +40,9 @@ public final class JsonHelper {
         this(null);
     }
 
-    public JsonHelper(JsonCodec codec) {
+    public JsonHelper(JsonService codec) {
         if (codec == null) {
-            codec = new DefaultJsonCodec();
+            codec = JsonService.getInstance();
         }
         this.codec = codec;
     }
@@ -76,7 +77,8 @@ public final class JsonHelper {
         }
         
         public void validate(JsonSchema schema, String json) throws ValidationException, ParseException {
-            codec.validate(schema, json);
+            JsonNode node = dataHelper.parse(json);
+            schema.validate(node);
         }
 
         private String addDraftv3(String jsonSchema) {
@@ -105,8 +107,12 @@ public final class JsonHelper {
             return codec.transform(entity);
         }
 
-        public <E> E transform(String json, Class<E> clazz) throws ParseException{
-            return codec.transform(json, clazz);
+        public <E> E parse(String json, Class<E> clazz) throws ParseException{
+            return codec.parse(json, clazz);
+        }
+        
+        public JsonNode parse(String json) throws ParseException{
+            return codec.parse(json);
         }
     }
 }
