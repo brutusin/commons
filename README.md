@@ -1,7 +1,7 @@
 #org.brutusin:commons [![Build Status](https://api.travis-ci.org/brutusin/commons.svg?branch=master)](https://travis-ci.org/brutusin/commons) [![Maven Central Latest Version](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/)
 Common utilities project. General purpose functionality used by other projects.
-##Usage
-###Maven dependency 
+
+##Maven dependency 
 This library is meant to be used by a java web module. If you are using maven, add this dependency to your war `pom.xml`:
 ```xml
 <dependency>
@@ -34,7 +34,7 @@ Add the following dependency to the provider pom:
      <scope>test</scope>
 </dependency>
 ```
-in order to extend the test at [here]() and verify they are passed. 
+in order to extend the [predefined tests](https://github.com/brutusin/commons/tree/master/src/test/java/org/brutusin/commons/json/spi) and verify they are passed. 
 
 See also:
 * [ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) for more details.
