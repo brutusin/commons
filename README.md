@@ -23,7 +23,8 @@ If you are not using maven and need help you can ask [here](https://github.com/b
 
 [JSON SPI](src/main/java/org/brutusin/commons/json/spi) is a service provider interface ([SPI](http://en.wikipedia.org/wiki/Service_provider_interface)) that defines all the JSON-related functionality needed by the rest of Brutusin modules, allowing to use different pluggable implementations (service providers) and decoupling client modules from them. 
 
-Note for implementing providers:
+**Note for implementing providers:**
+
 Add the following dependency to the provider pom:
 ```xml
 <dependency>
