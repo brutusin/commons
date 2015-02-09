@@ -1,12 +1,44 @@
 #org.brutusin:commons [![Build Status](https://api.travis-ci.org/brutusin/commons.svg?branch=master)](https://travis-ci.org/brutusin/commons) [![Maven Central Latest Version](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.brutusin/commons/)
 Common utilities project. General purpose functionality used by other projects.
+##Usage
+###Maven dependency 
+This library is meant to be used by a java web module. If you are using maven, add this dependency to your war `pom.xml`:
+```xml
+<dependency>
+    <groupId>org.brutusin</groupId>
+    <artifactId>commons</artifactId>
+</dependency>
+```
+Click [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.brutusin%22%20a%3A%22commons%22) to see the latest available version released to the Maven Central Repository.
+
+If you are not using maven and need help you can ask [here](https://github.com/brutusin/commons/issues).
 
 ## Main subcomponents:
 
-* [FifoTaskExecutor](src/main/java/org/brutusin/commons/concurrent/FifoTaskExecutor.java): Parallelizes the processing of an ordered input collection, keeping the order in the output.
-* [JSON SPI](src/main/java/org/brutusin/commons/json/spi): A service provider interface ([SPI](http://en.wikipedia.org/wiki/Service_provider_interface)) that defines all the JSON-related functionality needed by the rest of Brutusin modules, allowing to use different pluggable implementations (service providers) and decoupling client modules from them. 
-  * See [ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) for more details.
-  * See also [json-codec-jackson](https://github.com/brutusin/json-codec-jackson), the default JSON service provider.
+### FifoTaskExecutor
+
+[FifoTaskExecutor](src/main/java/org/brutusin/commons/concurrent/FifoTaskExecutor.java) parallelizes the processing of an ordered input collection, keeping the order in the output.
+
+### JSON SPI
+
+[JSON SPI](src/main/java/org/brutusin/commons/json/spi) is a service provider interface ([SPI](http://en.wikipedia.org/wiki/Service_provider_interface)) that defines all the JSON-related functionality needed by the rest of Brutusin modules, allowing to use different pluggable implementations (service providers) and decoupling client modules from them. 
+
+Note for implementing providers:
+Add the following dependency to the provider pom:
+```xml
+<dependency>
+     <groupId>org.brutusin</groupId>
+     <artifactId>commons</artifactId>
+     <type>test-jar</type>
+     <version>${commons.version}</version>
+     <scope>test</scope>
+</dependency>
+```
+in order to extend the test at [here]() and verify they are passed. 
+
+See also:
+* [ServiceLoader](http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) for more details.
+* [json-codec-jackson](https://github.com/brutusin/json-codec-jackson), the default JSON service provider.
 
 ## Support bugs and requests
 https://github.com/brutusin/commons/issues
