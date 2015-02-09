@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.brutusin</groupId>
         <artifactId>brutusin</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
     <groupId>org.brutusin</groupId>
     <artifactId>commons</artifactId>
@@ -47,4 +47,19 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
