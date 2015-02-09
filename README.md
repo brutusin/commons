@@ -2,11 +2,11 @@
 Common utilities project. General purpose functionality used by other projects.
 
 ##Maven dependency 
-This library is meant to be used by a java web module. If you are using maven, add this dependency to your war `pom.xml`:
 ```xml
 <dependency>
     <groupId>org.brutusin</groupId>
     <artifactId>commons</artifactId>
+    <version>${commons.version}</version>
 </dependency>
 ```
 Click [here](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.brutusin%22%20a%3A%22commons%22) to see the latest available version released to the Maven Central Repository.
