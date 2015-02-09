@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.brutusin</groupId>
         <artifactId>brutusin</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.4</version>
     </parent>
     <groupId>org.brutusin</groupId>
     <artifactId>commons</artifactId>
@@ -31,7 +31,11 @@
         <developerConnection>scm:git:https://github.com/brutusin/commons.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-   
+    
+   <properties>
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
