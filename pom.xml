@@ -12,6 +12,7 @@
     <version>1.2.4-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Brutusin common utilities</description>
+    
     <url>https://github.com/brutusin/commons</url>
     
     <issueManagement>
