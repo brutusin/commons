@@ -33,7 +33,7 @@
     </scm>
     
    <properties>
-        <maven.test.skip>true</maven.test.skip>
+     <!--   <maven.test.skip>true</maven.test.skip>-->
     </properties>
     
     <dependencies>
