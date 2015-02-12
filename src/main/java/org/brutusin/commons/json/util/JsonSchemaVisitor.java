@@ -19,20 +19,20 @@ import java.util.Iterator;
 import org.brutusin.commons.json.spi.JsonNode;
 
 /**
- * SchemaVisitor instances allow implement functionality for each subschema in
- * root schema, without concerns on structure navigation.
+ * JsonSchemaVisitor instances allow implement functionality for each subschema in
+ root schema, without concerns on structure navigation.
  * <br> <br>
  * Example:
  * <pre>
  *{@code
  * String schema = "{\"type\":\"object\",\"properties\":{\"map\":{\"type\":\"object\",\"additionalProperties\":{\"type\":\"string\"}},\"firstName\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"aaa\":{\"type\":\"string\"},\"bbb\":{\"type\":\"object\",\"additionalProperties\":{\"type\":\"string\"}}}}},\"middleName\":{\"type\":\"string\"},\"lastName\":{\"type\":\"string\"}},\"required\":[\"firstName\",\"lastName\"],\"additionalProperties\":false}";
- * JsonNode schemaNode = JsonCodec.getInstance().parse(schema);
- * SchemaVisitor.accept(schemaNode, new SchemaVisitor() {
- *     public void visit(String name, JsonNode subSchema) {
- *         System.out.println(name + ": " + schema.get("type").asString());
- *     }
- * });
- * }</pre>
+ JsonNode schemaNode = JsonCodec.getInstance().parse(schema);
+ JsonSchemaVisitor.accept(schemaNode, new JsonSchemaVisitor() {
+     public void visit(String name, JsonNode subSchema) {
+         System.out.println(name + ": " + schema.get("type").asString());
+     }
+ });
+ }</pre>
  * <br>
  * Produces the following output:
  * <pre>
@@ -52,7 +52,7 @@ import org.brutusin.commons.json.spi.JsonNode;
  * Note that "array" schemas and "object" schemas with "additionalProperties" produce names with [#] and [*] respectively, in order to represent its nature in the name itself.
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public abstract class SchemaVisitor {
+public abstract class JsonSchemaVisitor {
 
     /**
      * Called for each subschema in the accepted schema
@@ -68,7 +68,7 @@ public abstract class SchemaVisitor {
      * @param schema
      * @param visitor
      */
-    public static void accept(JsonNode rootSchema, SchemaVisitor visitor) {
+    public static void accept(JsonNode rootSchema, JsonSchemaVisitor visitor) {
         accept("", rootSchema, visitor);
     }
 
@@ -79,7 +79,7 @@ public abstract class SchemaVisitor {
      * @param schema
      * @param visitor
      */
-    private static void accept(String name, JsonNode schema, SchemaVisitor visitor) {
+    private static void accept(String name, JsonNode schema, JsonSchemaVisitor visitor) {
         if (schema == null) {
             return;
         }
