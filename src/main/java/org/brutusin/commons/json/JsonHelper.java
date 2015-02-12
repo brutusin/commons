@@ -72,21 +72,6 @@ public final class JsonHelper {
             schema.validate(node);
         }
 
-        private String addDraftv3(String jsonSchema) {
-            if (!jsonSchema.contains("\"$schema\"")) {
-                if (jsonSchema.startsWith("{\"type\":")) {
-                    StringBuilder sb = new StringBuilder(jsonSchema);
-                    sb.insert(1, "\"$schema\":\"http://json-schema.org/draft-03/schema#\",");
-                    return sb.toString();
-                }
-            }
-            return jsonSchema;
-        }
-
-        public JsonSchema getSchemaD3(String json) throws ParseException {
-            return getSchema(addDraftv3(json));
-        }
-
         public JsonSchema getSchema(String json) throws ParseException {
             return codec.parseSchema(json);
         }
