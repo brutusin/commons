@@ -17,12 +17,14 @@ package org.brutusin.commons.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import org.brutusin.commons.io.LineReader;
 
 public final class Miscellaneous {
 
@@ -75,9 +77,13 @@ public final class Miscellaneous {
         }
         return root.getMessage();
     }
-    
+
     private static Charset toCharset(Charset charset) {
         return charset == null ? Charset.defaultCharset() : charset;
+    }
+
+    public static Charset toCharset(String charset) {
+        return charset == null ? Charset.defaultCharset() : Charset.forName(charset);
     }
 
     public static InputStream toInputStream(String input) {
@@ -86,6 +92,33 @@ public final class Miscellaneous {
 
     public static InputStream toInputStream(String input, Charset encoding) {
         return new ByteArrayInputStream(input.getBytes(toCharset(encoding)));
+    }
+
+    public static String toString(InputStream input, String encoding)
+            throws IOException {
+
+        final StringBuilder sb = new StringBuilder();
+
+        LineReader lr = new LineReader(input, encoding) {
+            @Override
+            protected void processLine(String line) throws Exception {
+                if(getLineNumber()>1){
+                    sb.append("\n");
+                }
+                sb.append(line);
+            }
+
+            @Override
+            protected void onExceptionFound(Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        };
+        try {
+            lr.run();
+        } finally {
+            input.close();
+        }
+        return sb.toString();
     }
 
     private static Throwable getRootCause(final List<Throwable> visited, final Throwable th) {
