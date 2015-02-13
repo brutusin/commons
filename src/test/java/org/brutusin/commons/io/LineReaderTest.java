@@ -17,7 +17,7 @@ package org.brutusin.commons.io;
 
 import org.brutusin.commons.Bean;
 import java.io.InputStream;
-import org.apache.commons.io.IOUtils;
+import org.brutusin.commons.utils.Miscellaneous;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -29,7 +29,7 @@ public class LineReaderTest {
             + "31	32";
 
     private static InputStream createInputStream() {
-        return IOUtils.toInputStream(CONTENTS);
+        return Miscellaneous.toInputStream(CONTENTS);
     }
 
     @Test

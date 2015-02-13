@@ -15,12 +15,14 @@
  */
 package org.brutusin.commons.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public final class Miscellaneous {
 
@@ -67,12 +69,38 @@ public final class Miscellaneous {
     }
 
     public static String getRootCauseMessage(final Throwable th) {
-        Throwable root = ExceptionUtils.getRootCause(th);
-        root = root == null ? th : root;
+        Throwable root = getRootCause(new ArrayList(4), th);
+        if (root == null) {
+            return null;
+        }
         return root.getMessage();
     }
     
-    public static <T> List<T> createList(T... elements){
+    private static Charset toCharset(Charset charset) {
+        return charset == null ? Charset.defaultCharset() : charset;
+    }
+
+    public static InputStream toInputStream(String input) {
+        return toInputStream(input, Charset.defaultCharset());
+    }
+
+    public static InputStream toInputStream(String input, Charset encoding) {
+        return new ByteArrayInputStream(input.getBytes(toCharset(encoding)));
+    }
+
+    private static Throwable getRootCause(final List<Throwable> visited, final Throwable th) {
+        if (th == null || visited.contains(th)) {
+            return null;
+        }
+        Throwable cause = th.getCause();
+        if (cause == null) {
+            return th;
+        }
+        visited.add(th);
+        return getRootCause(visited, cause);
+    }
+
+    public static <T> List<T> createList(T... elements) {
         ArrayList<T> ret = new ArrayList(elements.length);
         for (int i = 0; i < elements.length; i++) {
             ret.add(elements[i]);
@@ -82,7 +110,7 @@ public final class Miscellaneous {
 
     public static void main(String[] args) {
         Exception ex = new Exception("hi");
-        System.out.println(ExceptionUtils.getRootCauseMessage(ex));
-        System.out.println(getRootCauseMessage(ex));
+        Exception ex2 = new Exception(ex);
+        System.out.println(getRootCauseMessage(ex2));
     }
 }
