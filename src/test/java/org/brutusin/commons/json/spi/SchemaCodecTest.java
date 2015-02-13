@@ -15,6 +15,7 @@
  */
 package org.brutusin.commons.json.spi;
 
+import org.brutusin.commons.json.ParseException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -71,6 +72,45 @@ public abstract class SchemaCodecTest {
     public void testAdditionalPropertiesSupport() {
         String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
         assertTrue(schemaStr.contains("\"additionalProperties\":{\"type\":\"boolean\"}"));
+    }
+    
+    @Test
+    public void testNotSchemaReferences() throws ParseException{
+        String bSchema = JsonCodec.getInstance().getSchema(B.class);
+        String aSchema = JsonCodec.getInstance().getSchema(A.class);
+        JsonNode bNode = JsonCodec.getInstance().parse(bSchema);
+        assertTrue(aSchema.contains(bNode.get("type").toString()));
+    }
+
+    class A {
+        B b;
+
+        public B getB() {
+            return b;
+        }
+        public void setB(B b) {
+            this.b = b;
+        }
+    }
+
+    class B {
+        C c;
+        public C getC() {
+            return c;
+        }
+        public void setC(C c) {
+            this.c = c;
+        }
+    }
+
+    class C {
+        String name;
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }
 
