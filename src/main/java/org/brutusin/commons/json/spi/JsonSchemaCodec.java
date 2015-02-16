@@ -16,15 +16,16 @@
 package org.brutusin.commons.json.spi;
 
 import org.brutusin.commons.json.ParseException;
-import org.brutusin.commons.json.ValidationException;
 
 /**
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 public interface JsonSchemaCodec {
-    
-    public String getSchema(Class clazz);
-    
+
+    public String getSchemaString(Class clazz);
+
+    public String getSchemaString(Class<?> clazz, String title, String description);
+
     public JsonSchema parseSchema(String json) throws ParseException;
 
 }

@@ -50,7 +50,7 @@ public abstract class SchemaCodecTest {
 
     @Test
     public void testJsonPropertyAnnotationSupport() {
-        String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
+        String schemaStr = JsonCodec.getInstance().getSchemaString(TestClass.class);
         assertTrue(schemaStr.contains("\"required\":true"));
         assertTrue(schemaStr.contains("\"title\":\"a title aint\""));
         assertTrue(schemaStr.contains("\"description\":\"A string\""));
@@ -64,20 +64,20 @@ public abstract class SchemaCodecTest {
     
     @Test
     public void testIndexablePropertyAnnotationSupport() {
-        String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
+        String schemaStr = JsonCodec.getInstance().getSchemaString(TestClass.class);
         assertTrue(schemaStr.contains("\"index\":\"index\""));
     }
     
     @Test
     public void testAdditionalPropertiesSupport() {
-        String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
+        String schemaStr = JsonCodec.getInstance().getSchemaString(TestClass.class);
         assertTrue(schemaStr.contains("\"additionalProperties\":{\"type\":\"boolean\"}"));
     }
     
     @Test
     public void testNotSchemaReferences() throws ParseException{
-        String bSchema = JsonCodec.getInstance().getSchema(B.class);
-        String aSchema = JsonCodec.getInstance().getSchema(A.class);
+        String bSchema = JsonCodec.getInstance().getSchemaString(B.class);
+        String aSchema = JsonCodec.getInstance().getSchemaString(A.class);
         JsonNode bNode = JsonCodec.getInstance().parse(bSchema);
         assertTrue(aSchema.contains(bNode.get("type").toString()));
     }

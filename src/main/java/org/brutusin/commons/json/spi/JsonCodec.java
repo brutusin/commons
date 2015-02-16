@@ -36,13 +36,29 @@ public abstract class JsonCodec implements JsonDataCodec, JsonSchemaCodec {
         while (it.hasNext()) {
             instances.add(it.next());
         }
-        if (instances.size() == 0) {
+        if (instances.isEmpty()) {
             throw new Error("No '" + JsonCodec.class.getSimpleName() + "' service provider found.");
         } else if (instances.size() > 1) {
             throw new Error("Multiple '" + JsonCodec.class.getSimpleName() + "' service providers found: " + instances);
         } else {
             instance = instances.get(0);
         }
+    }
+
+    @Override
+    public final String getSchemaString(Class<?> clazz, String title, String description) {
+        String ret = getSchemaString(clazz);
+        if (ret != null && (title != null || description != null)) {
+            StringBuilder sb = new StringBuilder(ret.trim());
+            if (description != null) {
+                sb.insert(1, "\"description\":\"" + quoteAsUTF8(description) + "\",");
+            }
+            if (title != null) {
+                sb.insert(1, "\"title\":\"" + quoteAsUTF8(title) + "\",");
+            }
+            ret = sb.toString();
+        }
+        return ret;
     }
 
     public static JsonCodec getInstance() {

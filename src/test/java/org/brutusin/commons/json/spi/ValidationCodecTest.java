@@ -49,7 +49,7 @@ public abstract class ValidationCodecTest {
 
     @Test
     public void test() throws Exception {
-        String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
+        String schemaStr = JsonCodec.getInstance().getSchemaString(TestClass.class);
         JsonSchema schema = JsonCodec.getInstance().parseSchema(schemaStr);
         JsonNode node = JsonCodec.getInstance().parse("{\"string\": \"4\", \"aint\":3}");
         schema.validate(node);
@@ -57,7 +57,7 @@ public abstract class ValidationCodecTest {
     
     @Test(expected = ValidationException.class)
     public void testFail1() throws Exception {
-        String schemaStr = JsonCodec.getInstance().getSchema(TestClass.class);
+        String schemaStr = JsonCodec.getInstance().getSchemaString(TestClass.class);
         JsonSchema schema = JsonCodec.getInstance().parseSchema(schemaStr);
         JsonNode node = JsonCodec.getInstance().parse("true");
         schema.validate(node);
