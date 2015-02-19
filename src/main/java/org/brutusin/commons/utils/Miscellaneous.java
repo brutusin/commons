@@ -24,6 +24,8 @@ import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.brutusin.commons.io.LineReader;
 
 public final class Miscellaneous {
@@ -102,7 +104,7 @@ public final class Miscellaneous {
         LineReader lr = new LineReader(input, encoding) {
             @Override
             protected void processLine(String line) throws Exception {
-                if(getLineNumber()>1){
+                if (getLineNumber() > 1) {
                     sb.append("\n");
                 }
                 sb.append(line);
@@ -141,9 +143,74 @@ public final class Miscellaneous {
         return ret;
     }
 
+    /**
+     * <p>
+     * Counts how many times the substring appears in the larger String.</p>
+     *
+     * <p>
+     * A <code>null</code> or empty ("") String input returns
+     * <code>0</code>.</p>
+     *
+     * <pre>
+     * StringUtils.countMatches(null, *)       = 0
+     * StringUtils.countMatches("", *)         = 0
+     * StringUtils.countMatches("abba", null)  = 0
+     * StringUtils.countMatches("abba", "")    = 0
+     * StringUtils.countMatches("abba", "a")   = 2
+     * StringUtils.countMatches("abba", "ab")  = 1
+     * StringUtils.countMatches("abba", "xxx") = 0
+     * </pre>
+     * <p>
+     *
+     * @param str the String to check, may be null
+     * @param subStrRegExp the substring reg expression to count, may be null
+     * @return the number of occurrences, 0 if either String is
+     * <code>null</code>
+     */
+    public static int countMatches(String str, String subStrRegExp) {
+        if (isEmpty(str) || isEmpty(subStrRegExp)) {
+            return 0;
+        }
+        Pattern p = Pattern.compile(subStrRegExp);
+        Matcher m = p.matcher(str);
+        int count = 0;
+        while (m.find()) {
+            count += 1;
+        }
+        return count;
+    }
+
+    /**
+     * <p>
+     * Checks if a String is empty ("") or null.</p>
+     *
+     * <pre>
+     * StringUtils.isEmpty(null)      = true
+     * StringUtils.isEmpty("")        = true
+     * StringUtils.isEmpty(" ")       = false
+     * StringUtils.isEmpty("bob")     = false
+     * StringUtils.isEmpty("  bob  ") = false
+     * </pre>
+     *
+     * <p>
+     * NOTE: This method changed in Lang version 2.0. It no longer trims the
+     * String. That functionality is available in isBlank().</p>
+     * <p>
+     * NOTE: Copied from apache commons-lang StringUtils.</p>
+     *
+     * @param str the String to check, may be null
+     * @return <code>true</code> if the String is empty or null
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
+
     public static void main(String[] args) {
         Exception ex = new Exception("hi");
         Exception ex2 = new Exception(ex);
         System.out.println(getRootCauseMessage(ex2));
+        
+        String s = "[*][#]sfasdfsd";
+        System.out.println(countMatches(s, "\\[[#\\*]\\]"));
     }
 }

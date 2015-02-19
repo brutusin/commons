@@ -29,6 +29,7 @@ public interface JsonNode {
         ARRAY,
         BOOLEAN,
         NULL,
+        INTEGER,
         NUMBER,
         STRING,
         ANY

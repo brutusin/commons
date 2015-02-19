@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.brutusin.commons.json.util;
 
 import org.brutusin.commons.json.spi.JsonNode;
@@ -23,22 +22,51 @@ import org.brutusin.commons.json.spi.JsonNode;
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
 public class JsonSchemaUtils {
-    
+
     /**
-     * Returns the type of the elements of map (an object with additionalProperties of type specified) schema.
+     * Returns the type of the elements of map (an object with
+     * additionalProperties of type specified) schema.
+     *
      * @param schema
      * @return null if is not map schema
      */
-    public static JsonNode.Type getMapValueType(JsonNode schema){
+    public static JsonNode.Type getMapValueType(JsonNode schema) {
         JsonNode.Type type = JsonNode.Type.valueOf(schema.get("type").asString().toUpperCase());
         JsonNode child;
-        if(type==JsonNode.Type.OBJECT && (child = schema.get("additionalProperties"))!=null){
-            JsonNode childType = child.get("type");
-            if(childType==null){
-                return null;
-            }
-            return JsonNode.Type.valueOf(childType.asString().toUpperCase());
+        if (type == JsonNode.Type.OBJECT && (child = schema.get("additionalProperties")) != null) {
+            return getFirstNonArrayValueType(child);
         }
         return null;
     }
+
+    /**
+     * Returns the type of the elements of an array.
+     *
+     * @param schema
+     * @return null if is not map schema
+     */
+    public static JsonNode.Type getArrayValueType(JsonNode schema) {
+        JsonNode.Type type = JsonNode.Type.valueOf(schema.get("type").asString().toUpperCase());
+        JsonNode child;
+        if (type == JsonNode.Type.ARRAY && (child = schema.get("items")) != null) {
+            return getFirstNonArrayValueType(child);
+        }
+        return null;
+    }
+
+    /**
+     * 
+     * @param schema
+     * @return 
+     */
+    public static JsonNode.Type getFirstNonArrayValueType(JsonNode schema) {
+        JsonNode.Type type = JsonNode.Type.valueOf(schema.get("type").asString().toUpperCase());
+        JsonNode child;
+        if (type == JsonNode.Type.ARRAY && (child = schema.get("items")) != null) {
+            return getFirstNonArrayValueType(child);
+        } else {
+            return type;
+        }
+    }
+
 }
