@@ -60,7 +60,7 @@ public abstract class JsonCodec implements JsonDataCodec, JsonSchemaCodec {
         }
         return ret;
     }
-
+    
     public static JsonCodec getInstance() {
         return instance;
     }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 brutusin.org
+ * Copyright 2015 Ignacio del Valle Alles idelvall@brutusin.org.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.brutusin.commons.json.spi;
+package org.brutusin.commons.search;
 
-import org.brutusin.commons.json.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public interface JsonDataCodec {
+public class ActiveFacetMap extends HashMap<String, Integer> {
 
-    public String quoteAsUTF8(String s);
+    public ActiveFacetMap() {
+    }
 
-    public <T> T parse(String json, Class<T> clazz) throws ParseException;
-
-    public JsonNode parse(String json) throws ParseException;
-
-    public String transform(Object o);
-    
-    public String prettyPrint(String json) throws ParseException;
+    public ActiveFacetMap(Map<String, Integer> map) {
+        super(map);
+    }
 }
