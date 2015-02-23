@@ -26,9 +26,11 @@ public interface JsonDataCodec {
 
     public <T> T parse(String json, Class<T> clazz) throws ParseException;
 
+    public <T> T load(JsonNode node, Class<T> clazz);
+
     public JsonNode parse(String json) throws ParseException;
 
     public String transform(Object o);
-    
+
     public String prettyPrint(String json) throws ParseException;
 }

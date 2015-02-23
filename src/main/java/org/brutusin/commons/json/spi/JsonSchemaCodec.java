@@ -22,6 +22,8 @@ import org.brutusin.commons.json.ParseException;
  */
 public interface JsonSchemaCodec {
 
+    public JsonSchema getSchema(Class clazz);
+
     public String getSchemaString(Class clazz);
 
     public String getSchemaString(Class<?> clazz, String title, String description);

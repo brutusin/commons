@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.brutusin.commons.json.ParseException;
 
 /**
  * Decouples application logic from JSON parsing providers.
@@ -60,7 +63,25 @@ public abstract class JsonCodec implements JsonDataCodec, JsonSchemaCodec {
         }
         return ret;
     }
-    
+
+    @Override
+    public JsonSchema getSchema(Class clazz) {
+        try {
+            return parseSchema(getSchemaString(clazz));
+        } catch (ParseException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public <T> T load(JsonNode node, Class<T> clazz) {
+        try {
+            return parse(node.toString(), clazz);
+        } catch (ParseException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     public static JsonCodec getInstance() {
         return instance;
     }
