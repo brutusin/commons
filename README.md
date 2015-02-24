@@ -25,8 +25,8 @@ If you are not using maven and need help you can ask [here](https://github.com/b
 
 #### Supported annotations
 The followong annotations can be used to customize schema generation, and must be supported by all providers:
-* `@JsonProperty`
-* `@IndexableProperty`
+* [`@JsonProperty`](src/main/java/org/brutusin/commons/json/annotations/JsonProperty.java). Lets specify standard schema properties like, default value, enumeration, title, description,...
+* [`@IndexableProperty`](src/main/java/org/brutusin/commons/json/annotations/IndexableProperty.java). Adds custom `"index":"index"` or `"index":"facet"` properties to the schema generated.
 
 #### Validation tests for implementing providers
 
