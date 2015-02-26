@@ -95,15 +95,22 @@ public final class Miscellaneous {
     }
 
     public static InputStream toInputStream(String input, Charset encoding) {
+        if (input == null) {
+            return null;
+        }
         return new ByteArrayInputStream(input.getBytes(toCharset(encoding)));
     }
 
-    public static String toString(InputStream input, String encoding)
+    public static String toString(InputStream is, String encoding)
             throws IOException {
+
+        if (is == null) {
+            return null;
+        }
 
         final StringBuilder sb = new StringBuilder();
 
-        LineReader lr = new LineReader(input, encoding) {
+        LineReader lr = new LineReader(is, encoding) {
             @Override
             protected void processLine(String line) throws Exception {
                 if (getLineNumber() > 1) {
@@ -120,7 +127,7 @@ public final class Miscellaneous {
         try {
             lr.run();
         } finally {
-            input.close();
+            is.close();
         }
         return sb.toString();
     }
@@ -138,6 +145,9 @@ public final class Miscellaneous {
     }
 
     public static <T> List<T> createList(T... elements) {
+        if (elements == null) {
+            return null;
+        }
         ArrayList<T> ret = new ArrayList(elements.length);
         for (int i = 0; i < elements.length; i++) {
             ret.add(elements[i]);
@@ -253,9 +263,9 @@ public final class Miscellaneous {
     /**
      * Writes a String to a file creating the file if it does not exist.
      *
-     * @param file  the file to write
-     * @param data  the content to write to the file
-     * @param charset  the encoding to use, {@code null} means platform default
+     * @param file the file to write
+     * @param data the content to write to the file
+     * @param charset the encoding to use, {@code null} means platform default
      * @throws IOException in case of an I/O error
      */
     public static void writeStringToFile(File file, String data, String charset) throws IOException {
