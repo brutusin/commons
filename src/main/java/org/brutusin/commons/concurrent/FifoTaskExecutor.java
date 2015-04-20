@@ -15,8 +15,8 @@
  */
 package org.brutusin.commons.concurrent;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,9 +30,9 @@ import java.util.logging.Logger;
  * Executes {@link FifoTask} tasks asynchronously keeping the output order,
  * using a pool of threads of size {@code maxThreads}.
  * <br><br>
- * A maximum of {@code maxThreads} (see {@link #FifoTaskExecutor(int)}) tasks can be
- * run concurrently. If more task are submitted, {@link #execute(FifoTask)}
- * blocks until a thread becomes available.
+ * A maximum of {@code maxThreads} (see {@link #FifoTaskExecutor(int)}) tasks
+ * can be run concurrently. If more task are submitted,
+ * {@link #execute(FifoTask)} blocks until a thread becomes available.
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  * @see FifoTask
@@ -41,9 +41,12 @@ public class FifoTaskExecutor<E> {
 
     private final int maxThreads;
     private final ThreadPoolExecutor threadPoolExecutor;
-    private final Queue<FifoTask> queue = new LinkedList();
+    private final HashMap<Integer, FifoTask<E>> taskMap = new HashMap();
+    private final TreeMap<Integer, Result<E>> resultMap = new TreeMap();
 
-    private int counter;
+    private volatile int lastResult=-1;
+    private volatile int idCounter;
+    private volatile int activeCounter;
 
     /**
      * Same as {@code FifoTaskExecutor(0, null)}
@@ -109,6 +112,22 @@ public class FifoTaskExecutor<E> {
         return threadPoolExecutor.awaitTermination(timeout, unit);
     }
 
+    private void processResults() {
+        synchronized (resultMap) {
+            while (!resultMap.isEmpty() && resultMap.firstKey() == lastResult + 1) {
+                Integer id = resultMap.firstKey();
+                Result<E> result = resultMap.remove(id);
+                FifoTask<E> task = taskMap.remove(id);
+                if (result.th != null) {
+                    task.onError(result.th);
+                } else {
+                    task.runSequential(result.e);
+                }
+                lastResult = id;
+            }
+        }
+    }
+
     /**
      * Executes the submitted task. If the maximum number of pooled threads is
      * in use, this method blocks until one of a them is available.
@@ -117,42 +136,32 @@ public class FifoTaskExecutor<E> {
      * @throws InterruptedException
      */
     public void execute(final FifoTask<E> task) throws InterruptedException {
+        final int id;
         synchronized (this) {
-            while (counter >= maxThreads) {
+            id = idCounter++;
+            taskMap.put(id, task);
+            while (activeCounter >= maxThreads) {
                 wait();
             }
-            counter++;
+            activeCounter++;
         }
-        synchronized (queue) {
-            queue.add(task);
-        }
+
         this.threadPoolExecutor.execute(new Runnable() {
             public void run() {
                 try {
                     try {
                         final E outcome = task.runParallel();
-                        synchronized (queue) {
-                            while (queue.peek() != task) {
-                                queue.wait();
-                            }
-                            queue.poll();
-                            task.runSequential(outcome);
-                            queue.notifyAll();
+                        synchronized (resultMap) {
+                            resultMap.put(id, new Result(outcome));
                         }
-
                     } catch (Throwable th) {
-                        synchronized (queue) {
-                            while (queue.peek() != task) {
-                                queue.wait();
-                            }
-                            queue.poll();
-                            task.onError(th);
-                            queue.notifyAll();
+                        synchronized (resultMap) {
+                            resultMap.put(id, new Result(null, th));
                         }
                     } finally {
-                        // Unblock execute() callers
+                        processResults();
                         synchronized (FifoTaskExecutor.this) {
-                            counter--;
+                            activeCounter--;
                             FifoTaskExecutor.this.notifyAll();
                         }
                     }
@@ -161,5 +170,21 @@ public class FifoTaskExecutor<E> {
                 }
             }
         });
+    }
+
+    private class Result<E> {
+
+        private final E e;
+        private final Throwable th;
+
+        public Result(E e) {
+            this.e = e;
+            this.th = null;
+        }
+
+        public Result(E e, Throwable th) {
+            this.e = e;
+            this.th = th;
+        }
     }
 }
