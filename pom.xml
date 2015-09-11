@@ -32,8 +32,8 @@
         <tag>HEAD</tag>
     </scm>
     
-    <properties>
-        <!--   <maven.test.skip>true</maven.test.skip>-->
+   <properties>
+     <!--   <maven.test.skip>true</maven.test.skip>-->
     </properties>
     
     <dependencies>
@@ -43,4 +43,19 @@
             <scope>test</scope>   
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
