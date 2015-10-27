@@ -18,14 +18,19 @@ package org.brutusin.commons.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.brutusin.commons.io.LineReader;
@@ -272,6 +277,275 @@ public final class Miscellaneous {
         FileOutputStream fos = openOutputStream(file, false);
         fos.write(data.getBytes(charset));
         fos.close();
+    }
+
+    /**
+     * Determines whether the specified file is a Symbolic Link rather than an
+     * actual file.
+     * <p>
+     * Will not return true if there is a Symbolic Link anywhere in the path,
+     * only if the specific file is.
+     * <p>
+     * <b>Note:</b> the current implementation always returns {@code false} if
+     * the system is detected as Windows.
+     *
+     * Copied from org.apache.commons.io.FileuUils
+     *
+     * @param file the file to check
+     * @return true if the file is a Symbolic Link
+     * @throws IOException if an IO error occurs while checking the file
+     */
+    public static boolean isSymlink(File file) throws IOException {
+        if (file == null) {
+            throw new NullPointerException("File must not be null");
+        }
+        if (File.separatorChar == '\\') {
+            return false;
+        }
+        File fileInCanonicalDir = null;
+        if (file.getParent() == null) {
+            fileInCanonicalDir = file;
+        } else {
+            File canonicalDir = file.getParentFile().getCanonicalFile();
+            fileInCanonicalDir = new File(canonicalDir, file.getName());
+        }
+
+        if (fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile())) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Cleans a directory without deleting it.
+     *
+     * Copied from org.apache.commons.io.FileuUils
+     *
+     * @param directory directory to clean
+     * @throws IOException in case cleaning is unsuccessful
+     */
+    public static void cleanDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            String message = directory + " does not exist";
+            throw new IllegalArgumentException(message);
+        }
+
+        if (!directory.isDirectory()) {
+            String message = directory + " is not a directory";
+            throw new IllegalArgumentException(message);
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null) {  // null if security restricted
+            throw new IOException("Failed to list contents of " + directory);
+        }
+
+        IOException exception = null;
+        for (File file : files) {
+            try {
+                forceDelete(file);
+            } catch (IOException ioe) {
+                exception = ioe;
+            }
+        }
+
+        if (null != exception) {
+            throw exception;
+        }
+    }
+
+    /**
+     * Deletes a file. If file is a directory, delete it and all
+     * sub-directories.
+     * <p>
+     * The difference between File.delete() and this method are:
+     * <ul>
+     * <li>A directory to be deleted does not have to be empty.</li>
+     * <li>You get exceptions when a file or directory cannot be deleted.
+     * (java.io.File methods returns a boolean)</li>
+     * </ul>
+     *
+     * Copied from org.apache.commons.io.FileuUils
+     *
+     * @param file file or directory to delete, must not be {@code null}
+     * @throws NullPointerException if the directory is {@code null}
+     * @throws FileNotFoundException if the file was not found
+     * @throws IOException in case deletion is unsuccessful
+     */
+    public static void forceDelete(File file) throws IOException {
+        if (file.isDirectory()) {
+            deleteDirectory(file);
+        } else {
+            boolean filePresent = file.exists();
+            if (!file.delete()) {
+                if (!filePresent) {
+                    throw new FileNotFoundException("File does not exist: " + file);
+                }
+                String message
+                        = "Unable to delete file: " + file;
+                throw new IOException(message);
+            }
+        }
+    }
+
+    /**
+     * Deletes a directory recursively.
+     *
+     * Copied from org.apache.commons.io.FileuUils
+     *
+     * @param directory directory to delete
+     * @throws IOException in case deletion is unsuccessful
+     */
+    public static void deleteDirectory(File directory) throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+
+        if (!isSymlink(directory)) {
+            cleanDirectory(directory);
+        }
+
+        if (!directory.delete()) {
+            String message
+                    = "Unable to delete directory " + directory + ".";
+            throw new IOException(message);
+        }
+    }
+    
+    public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
+        return pipeSynchronously(is, 1024, os);
+    }
+
+    public static long pipeSynchronously(final InputStream is, int bufferSize, final OutputStream... os) throws IOException {
+        try {
+            byte[] buffer = new byte[bufferSize];
+            int r = -1;
+            long read = 0;
+            while ((r = is.read(buffer)) > 0) {
+                for (int i = 0; i < os.length; i++) {
+                    os[i].write(buffer, 0, r);
+                }
+                read += r;
+            }
+            for (int i = 0; i < os.length; i++) {
+                os[i].flush();
+            }
+            return read;
+        } catch (Throwable th) {
+            Logger.getLogger(Miscellaneous.class.getName()).log(Level.SEVERE, null, th);
+            if (th instanceof Error) {
+                throw (Error) th;
+            }
+            if (th instanceof IOException) {
+                throw (IOException) th;
+            }
+            if (th instanceof RuntimeException) {
+                throw (RuntimeException) th;
+            }
+            throw new RuntimeException(th);
+        } finally {
+            is.close();
+            for (int i = 0; i < os.length; i++) {
+                os[i].close();
+            }
+        }
+    }
+
+    /**
+     * Replaces all "\" and "/" in the specified file path by
+     * <code>file.separator</code> system property.
+     *
+     * @param filePath the original file path.
+     * @return the formatted file path.
+     */
+    public static String formatFilePath(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+        return normalizePath(filePath.replaceAll("//*", "/").replaceAll("\\*", "\\").replaceAll("/", "\\" + System.getProperty("file.separator")).replaceAll("\\\\", "\\" + System.getProperty("file.separator")), System.getProperty("file.separator").equals("/"));
+
+    }
+
+    private static String normalizePath(String path, boolean linuxStyle) {
+        String separator = linuxStyle ? "/" : "\\\\";
+        String[] tokens = path.split(separator);
+        Stack<String> stk = new Stack<String>();
+        boolean tokenPassed = false;
+        for (int i = 0; i < tokens.length; i++) {
+            if (tokens[i].equals(".")) {
+                continue;
+            }
+            if (tokenPassed) {
+                if (tokens[i].equals("..")) {
+                    stk.pop();
+                } else {
+                    stk.add(tokens[i]);
+                }
+            } else {
+                if (!tokens[i].equals("..")) {
+                    tokenPassed = true;
+                }
+                stk.add(tokens[i]);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < stk.size(); i++) {
+            String element = stk.get(i);
+            if (i > 0) {
+                sb.append(linuxStyle ? "/" : "\\");
+            }
+            sb.append(element);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Creates a file in the specified path. Creates also any necessary folder
+     * needed to achieve the file level of nesting.
+     *
+     * @param filePath the path of file to create.
+     * @return the new created file. <code>null</code> if the file can no be
+     * created.
+     * @throws IOException if an IO error occurs.
+     */
+    public static File createFile(String filePath) throws IOException {
+
+        boolean isDirectory = filePath.endsWith("/") || filePath.endsWith("\\");
+
+        String formattedFilePath = formatFilePath(filePath);
+
+        File f = new File(formattedFilePath);
+
+        if (f.exists()) {
+            return f;
+        }
+
+        f.setExecutable(true, false);
+        f.setReadable(true, false);
+        f.setWritable(true, false);
+
+        if (isDirectory) {
+            f.mkdirs();
+        } else {
+            f.getParentFile().mkdirs();
+            f.createNewFile();
+        }
+        if (f.exists()) {
+            return f;
+        }
+        throw new IOException("Error creating file: " + f.getAbsolutePath());
+    }
+
+    public static File createDirectory(File file) throws IOException {
+        return createDirectory(file.getAbsolutePath());
+    }
+
+    public static File createDirectory(String folderPath) throws IOException {
+        if (!folderPath.endsWith("/")) {
+            folderPath = folderPath + "/";
+        }
+        return createFile(folderPath);
     }
 
     public static void main(String[] args) {
