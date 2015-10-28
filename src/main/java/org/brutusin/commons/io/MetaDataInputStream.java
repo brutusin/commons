@@ -95,11 +95,25 @@ public class MetaDataInputStream extends InputStream{
 
     @Override
     public boolean equals(Object obj) {
-        return is.equals(obj);
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MetaDataInputStream other = (MetaDataInputStream) obj;
+        if (this.is != other.is && (this.is == null || !this.is.equals(other.is))) {
+            return false;
+        }
+        return true;
     }
 
+    
+    
     @Override
     public String toString() {
         return (name != null ? (name + ": ") : "") + is.toString();
     }
+    
+    
 }
