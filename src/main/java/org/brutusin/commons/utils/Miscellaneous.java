@@ -433,7 +433,6 @@ public final class Miscellaneous {
             }
             return read;
         } catch (Throwable th) {
-            Logger.getLogger(Miscellaneous.class.getName()).log(Level.SEVERE, null, th);
             if (th instanceof Error) {
                 throw (Error) th;
             }
