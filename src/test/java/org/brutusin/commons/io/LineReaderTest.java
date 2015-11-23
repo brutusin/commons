@@ -33,7 +33,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void testRun() {
+    public void testRun() throws Exception {
         final StringBuilder sb = new StringBuilder();
         final Bean<Boolean> onFinishCalled = new Bean<Boolean>();
         LineReader lr = new LineReader(createInputStream()) {
@@ -63,7 +63,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void testExit() {
+    public void testExit() throws Exception{
         final Bean<Boolean> exited = new Bean<Boolean>();
         final Bean<Boolean> onFinishCalled = new Bean<Boolean>();
         LineReader lr = new LineReader(createInputStream()) {
@@ -92,7 +92,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void testGetLineNumber() {
+    public void testGetLineNumber() throws Exception{
         final StringBuilder sb = new StringBuilder();
         LineReader lr = new LineReader(createInputStream()) {
             @Override
@@ -109,7 +109,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void testIsLastLine() {
+    public void testIsLastLine() throws Exception{
         final StringBuilder sb = new StringBuilder();
         LineReader lr = new LineReader(createInputStream()) {
             @Override
@@ -129,7 +129,7 @@ public class LineReaderTest {
      * Test of getBytesBuffered method, of class LineReader.
      */
     @Test
-    public void testGetBytesBuffered() {
+    public void testGetBytesBuffered() throws Exception{
         final int totalBytes = CONTENTS.getBytes().length;
         LineReader lr = new LineReader(createInputStream()) {
             @Override
@@ -151,7 +151,7 @@ public class LineReaderTest {
     }
 
     @Test
-    public void testOnExceptionFound() {
+    public void testOnExceptionFound() throws Exception{
         final StringBuilder sb = new StringBuilder();
         final String exMessage = "exMessage";
         LineReader lr = new LineReader(createInputStream()) {
