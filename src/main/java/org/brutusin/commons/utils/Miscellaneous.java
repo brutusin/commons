@@ -130,7 +130,11 @@ public final class Miscellaneous {
             }
         };
         try {
-            lr.run();
+            try {
+                lr.run();
+            } catch (InterruptedException ie) {
+                throw new RuntimeException(ie);
+            }
         } finally {
             is.close();
         }
