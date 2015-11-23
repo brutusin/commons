@@ -28,7 +28,7 @@ import org.brutusin.commons.org.apache.commons.io.input.CountingInputStream;
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public abstract class LineReader implements Runnable {
+public abstract class LineReader {
 
     public static final String DEFAULT_CHARSET = "UTF-8";
     private CountingInputStream is;
@@ -59,11 +59,13 @@ public abstract class LineReader implements Runnable {
         this.is = new CountingInputStream(is);
         this.charset = Charset.forName(charset);
     }
-
+    
     /**
-     * Synchronously processes the input stream.
+     * Synchronously processes the input stream
+     * @throws IOException
+     * @throws InterruptedException 
      */
-    public final void run() {
+    public final void run() throws IOException, InterruptedException {
         InputStreamReader isr = new InputStreamReader(this.is, this.charset);
         BufferedReader br = new BufferedReader(isr);
         this.line = null;
@@ -73,6 +75,9 @@ public abstract class LineReader implements Runnable {
                 if (this.exit) {
                     return;
                 }
+                if(Thread.currentThread().isInterrupted()){
+                throw new InterruptedException();
+            }
                 this.nextLine = br.readLine();
                 try {
                     if (this.line != null) {
@@ -88,8 +93,6 @@ public abstract class LineReader implements Runnable {
                     this.line = this.nextLine;
                 }
             } while (this.line != null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         } finally {
             onFinish();
         }
