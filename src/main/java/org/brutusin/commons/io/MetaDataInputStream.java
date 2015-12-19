@@ -22,18 +22,24 @@ import java.io.InputStream;
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public class MetaDataInputStream extends InputStream{
+public class MetaDataInputStream extends InputStream {
 
     private final String name;
     private final String contentType;
     private final Long length;
+    private final Long lastModified;
     private final InputStream is;
 
-    public MetaDataInputStream(InputStream is, String name, String contentType, Long length) {
+    public MetaDataInputStream(InputStream is, String name, String contentType, Long length, Long lastModified) {
         this.contentType = contentType;
         this.length = length;
         this.is = is;
         this.name = name;
+        this.lastModified = lastModified;
+    }
+
+    public Long getLastModified() {
+        return lastModified;
     }
 
     public String getName() {
@@ -108,12 +114,9 @@ public class MetaDataInputStream extends InputStream{
         return true;
     }
 
-    
-    
     @Override
     public String toString() {
         return (name != null ? (name + ": ") : "") + is.toString();
     }
-    
-    
+
 }
