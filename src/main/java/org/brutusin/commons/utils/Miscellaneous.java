@@ -27,10 +27,10 @@ import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.brutusin.commons.io.LineReader;
@@ -416,7 +416,7 @@ public final class Miscellaneous {
             throw new IOException(message);
         }
     }
-    
+
     public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
         return pipeSynchronously(is, 1024, os);
     }
@@ -549,6 +549,28 @@ public final class Miscellaneous {
             folderPath = folderPath + "/";
         }
         return createFile(folderPath);
+    }
+
+    public static <T> T getInstance(Class<T> service, boolean required) {
+        ServiceLoader<T> sl = ServiceLoader.load(service);
+        Iterator<T> it = sl.iterator();
+        List<T> instances = new ArrayList();
+        while (it.hasNext()) {
+            instances.add(it.next());
+        }
+        if (instances.isEmpty()) {
+            if (required) {
+                throw new Error("No '" + service.getSimpleName() + "' service provider found.");
+            }
+            return null;
+        } else if (instances.size() > 1) {
+            throw new Error("Multiple '" + service.getSimpleName() + "' service providers found: " + instances);
+        }
+        return instances.get(0);
+    }
+
+    public static <T> T getInstance(Class<T> service) {
+        return getInstance(service, true);
     }
 
     public static void main(String[] args) {
