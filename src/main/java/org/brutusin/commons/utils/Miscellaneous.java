@@ -560,11 +560,11 @@ public final class Miscellaneous {
         }
         if (instances.isEmpty()) {
             if (required) {
-                throw new Error("No '" + service.getSimpleName() + "' service provider found.");
+                throw new Error("No '" + service.getName() + "' service provider found.");
             }
             return null;
         } else if (instances.size() > 1) {
-            throw new Error("Multiple '" + service.getSimpleName() + "' service providers found: " + instances);
+            throw new Error("Multiple '" + service.getName() + "' service providers found: " + instances);
         }
         return instances.get(0);
     }
