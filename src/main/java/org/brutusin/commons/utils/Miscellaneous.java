@@ -382,6 +382,7 @@ public final class Miscellaneous {
             deleteDirectory(file);
         } else {
             boolean filePresent = file.exists();
+            file.setWritable(true);
             if (!file.delete()) {
                 if (!filePresent) {
                     throw new FileNotFoundException("File does not exist: " + file);
@@ -450,8 +451,10 @@ public final class Miscellaneous {
         } finally {
             is.close();
             for (int i = 0; i < os.length; i++) {
+                os[i].flush();
                 os[i].close();
             }
+            System.gc();
         }
     }
 
