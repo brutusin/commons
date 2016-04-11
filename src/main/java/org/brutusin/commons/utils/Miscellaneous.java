@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -574,6 +576,17 @@ public final class Miscellaneous {
 
     public static <T> T getInstance(Class<T> service) {
         return getInstance(service, true);
+    }
+
+    public static Class getClass(Type type) {
+        if (type instanceof Class) {
+            return (Class) type;
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) type;
+            return getClass(pt.getRawType());
+        }
+        return Object.class;
     }
 
     public static void main(String[] args) {
