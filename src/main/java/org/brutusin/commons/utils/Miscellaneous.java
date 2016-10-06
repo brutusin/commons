@@ -24,15 +24,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.brutusin.commons.io.LineReader;
@@ -420,6 +425,28 @@ public final class Miscellaneous {
         }
     }
 
+    /**
+     * Asynchronous buffered writing from is to os. Finally closes inputstream.
+     *
+     * @param is
+     * @param os
+     */
+    public static Thread pipeAsynchronously(final InputStream is, final OutputStream... os) {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    pipeSynchronously(is, os);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        t.setDaemon(true);
+        t.start();
+        return t;
+    }
+
     public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
         return pipeSynchronously(is, 1024, os);
     }
@@ -431,12 +458,16 @@ public final class Miscellaneous {
             long read = 0;
             while ((r = is.read(buffer)) > 0) {
                 for (int i = 0; i < os.length; i++) {
-                    os[i].write(buffer, 0, r);
+                    if (os[i] != null) {
+                        os[i].write(buffer, 0, r);
+                    }
                 }
                 read += r;
             }
             for (int i = 0; i < os.length; i++) {
-                os[i].flush();
+                if (os[i] != null) {
+                    os[i].flush();
+                }
             }
             return read;
         } catch (Throwable th) {
@@ -453,10 +484,11 @@ public final class Miscellaneous {
         } finally {
             is.close();
             for (int i = 0; i < os.length; i++) {
-                os[i].flush();
-                os[i].close();
+                if (os[i] != null) {
+                    os[i].flush();
+                    os[i].close();
+                }
             }
-            System.gc();
         }
     }
 
@@ -529,10 +561,6 @@ public final class Miscellaneous {
             return f;
         }
 
-        f.setExecutable(true, false);
-        f.setReadable(true, false);
-        f.setWritable(true, false);
-
         if (isDirectory) {
             f.mkdirs();
         } else {
@@ -540,6 +568,9 @@ public final class Miscellaneous {
             f.createNewFile();
         }
         if (f.exists()) {
+            f.setExecutable(true, false);
+            f.setReadable(true, false);
+            f.setWritable(true, false);
             return f;
         }
         throw new IOException("Error creating file: " + f.getAbsolutePath());
@@ -587,6 +618,53 @@ public final class Miscellaneous {
             return getClass(pt.getRawType());
         }
         return Object.class;
+    }
+
+    public static int getUnixId(Process p) {
+        if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+            try {
+                Field fPid = p.getClass().getDeclaredField("pid");
+                if (!fPid.isAccessible()) {
+                    fPid.setAccessible(true);
+                }
+                return fPid.getInt(p);
+            } catch (Exception ex) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    public static long getGlobalAutoIncremental(File file) throws IOException {
+        if (!file.exists()) {
+            createFile(file.getAbsolutePath());
+        }
+        RandomAccessFile raf = new RandomAccessFile(file, "rws");
+        FileLock lock = null;
+        long value = 0;
+        try {
+            while ((lock = raf.getChannel().tryLock()) == null) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            if (raf.length() == 0) {
+                value = 0;
+            } else {
+                value = raf.readLong();
+            }
+            value++;
+            raf.seek(0);
+            raf.writeLong(value);
+        } finally {
+            if (lock != null) {
+                lock.release();
+            }
+            raf.close();
+        }
+        return value;
     }
 
     public static void main(String[] args) {
