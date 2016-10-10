@@ -44,6 +44,14 @@ import org.brutusin.commons.io.LineReader;
 
 public final class Miscellaneous {
 
+    private final static Logger LOGGER = Logger.getLogger(Miscellaneous.class.getName());
+
+    private static final ErrorHandler LOG_HANDLER = new ErrorHandler() {
+        public void onThrowable(Throwable th) {
+            LOGGER.log(Level.WARNING, th.getMessage(), th);
+        }
+    };
+
     private Miscellaneous() {
     }
 
@@ -429,22 +437,29 @@ public final class Miscellaneous {
      * Asynchronous buffered writing from is to os. Finally closes inputstream.
      *
      * @param is
+     * @param logger
      * @param os
      */
-    public static Thread pipeAsynchronously(final InputStream is, final OutputStream... os) {
+    public static Thread pipeAsynchronously(final InputStream is, final ErrorHandler errorHandler, final OutputStream... os) {
         Thread t = new Thread() {
             @Override
             public void run() {
                 try {
                     pipeSynchronously(is, os);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (Throwable th) {
+                    if (errorHandler != null) {
+                        errorHandler.onThrowable(th);
+                    }
                 }
             }
         };
         t.setDaemon(true);
         t.start();
         return t;
+    }
+
+    public static Thread pipeAsynchronously(final InputStream is, final OutputStream... os) {
+        return pipeAsynchronously(is, LOG_HANDLER, os);
     }
 
     public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
