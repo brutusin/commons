@@ -66,7 +66,7 @@ public final class ProcessUtils {
             if (stderr != null) {
                 sb.append("\n" + stderr);
             }
-            throw new RuntimeException(sb.toString());
+            throw new ProcessException(sb.toString());
         }
     }
 

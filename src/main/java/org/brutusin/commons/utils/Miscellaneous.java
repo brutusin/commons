@@ -15,6 +15,7 @@
  */
 package org.brutusin.commons.utils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -440,12 +441,12 @@ public final class Miscellaneous {
      * @param logger
      * @param os
      */
-    public static Thread pipeAsynchronously(final InputStream is, final ErrorHandler errorHandler, final OutputStream... os) {
+    public static Thread pipeAsynchronously(final InputStream is, final ErrorHandler errorHandler, final boolean closeResources, final OutputStream... os) {
         Thread t = new Thread() {
             @Override
             public void run() {
                 try {
-                    pipeSynchronously(is, os);
+                    pipeSynchronously(is, closeResources, os);
                 } catch (Throwable th) {
                     if (errorHandler != null) {
                         errorHandler.onThrowable(th);
@@ -459,14 +460,22 @@ public final class Miscellaneous {
     }
 
     public static Thread pipeAsynchronously(final InputStream is, final OutputStream... os) {
-        return pipeAsynchronously(is, LOG_HANDLER, os);
+        return pipeAsynchronously(is, LOG_HANDLER, true, os);
+    }
+
+    public static Thread pipeAsynchronously(final InputStream is, boolean closeResources, final OutputStream... os) {
+        return pipeAsynchronously(is, LOG_HANDLER, closeResources, os);
     }
 
     public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
-        return pipeSynchronously(is, 1024, os);
+        return pipeSynchronously(is, 1024, true, os);
     }
 
-    public static long pipeSynchronously(final InputStream is, int bufferSize, final OutputStream... os) throws IOException {
+    public static long pipeSynchronously(final InputStream is, boolean closeResources, final OutputStream... os) throws IOException {
+        return pipeSynchronously(is, 1024, closeResources, os);
+    }
+
+    public static long pipeSynchronously(final InputStream is, int bufferSize, boolean closeResources, final OutputStream... os) throws IOException {
         try {
             byte[] buffer = new byte[bufferSize];
             int r = -1;
@@ -485,23 +494,54 @@ public final class Miscellaneous {
                 }
             }
             return read;
-        } catch (Throwable th) {
-            if (th instanceof Error) {
-                throw (Error) th;
-            }
-            if (th instanceof IOException) {
-                throw (IOException) th;
-            }
-            if (th instanceof RuntimeException) {
-                throw (RuntimeException) th;
-            }
-            throw new RuntimeException(th);
         } finally {
-            is.close();
             for (int i = 0; i < os.length; i++) {
                 if (os[i] != null) {
                     os[i].flush();
-                    os[i].close();
+                }
+            }
+            if (closeResources) {
+                is.close();
+                for (int i = 0; i < os.length; i++) {
+                    if (os[i] != null) {
+                        os[i].close();
+                    }
+                }
+            }
+        }
+    }
+
+    public static long pipeSynchronously(final BufferedReader br, final OutputStream... os) throws IOException {
+        return pipeSynchronously(br, true, os);
+    }
+
+    public static long pipeSynchronously(final BufferedReader br, boolean closeResources, final OutputStream... os) throws IOException {
+        long lineCounter = 0;
+        String line;
+        try {
+            while ((line = br.readLine()) != null) {
+                lineCounter++;
+                for (int i = 0; i < os.length; i++) {
+                    if (os[i] != null) {
+                        synchronized (os[i]) {
+                            os[i].write((line + "\n").getBytes());
+                        }
+                    }
+                }
+            }
+            return lineCounter;
+        } finally {
+            for (int i = 0; i < os.length; i++) {
+                if (os[i] != null) {
+                    os[i].flush();
+                }
+            }
+            if (closeResources) {
+                br.close();
+                for (int i = 0; i < os.length; i++) {
+                    if (os[i] != null) {
+                        os[i].close();
+                    }
                 }
             }
         }
