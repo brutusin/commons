@@ -69,7 +69,7 @@ public final class ProcessUtils {
             throw new ProcessException(sb.toString());
         }
     }
-
+    
     private static String getMessage(ByteArrayOutputStream baos) {
         String toString = baos.toString();
         if (toString == null) {
