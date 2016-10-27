@@ -67,6 +67,14 @@ public final class Miscellaneous {
         return baos.toString();
     }
 
+    public static String append(String token, int times) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            sb.append(token);
+        }
+        return sb.toString();
+    }
+
     /**
      * Returns a string representation of the specified object array.
      *
