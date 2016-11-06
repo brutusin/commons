@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.ServiceLoader;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -730,12 +731,41 @@ public final class Miscellaneous {
         return value;
     }
 
-    public static void main(String[] args) {
-        Exception ex = new Exception("hi");
-        Exception ex2 = new Exception(ex);
-        System.out.println(getRootCauseMessage(ex2));
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format(Locale.ROOT, "%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
 
-        String s = "[*][#]sfasdfsd";
-        System.out.println(countMatches(s, "\\[[#\\*]\\]"));
+    public static long parseHumanReadableByteCount(String s) {
+        Pattern pattern = Pattern.compile("([0-9.]+)\\s*([kKMGTPE]?)(i?)B?");
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.matches()) {
+            float value = Float.parseFloat(matcher.group(1));
+            int exp;
+            if (matcher.group(2).isEmpty()) {
+                exp = -1;
+            } else {
+                exp = "KMGTPE".indexOf(matcher.group(2).toUpperCase());
+            }
+            int unit;
+            if (matcher.group(3).isEmpty()) {
+                unit = 1000;
+            } else {
+                unit = 1024;
+            }
+            return (long) (value * Math.pow(unit, exp + 1));
+        }
+        throw new IllegalArgumentException("Invalid unit in memory representation '" + s + "' ");
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println(humanReadableByteCount(1899999976158l, true));
+        System.out.println(parseHumanReadableByteCount("134K"));
     }
 }
