@@ -476,20 +476,23 @@ public final class Miscellaneous {
         return pipeAsynchronously(is, LOG_HANDLER, closeResources, os);
     }
 
-    public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws IOException {
+    public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws InterruptedException, IOException {
         return pipeSynchronously(is, 1024, true, os);
     }
 
-    public static long pipeSynchronously(final InputStream is, boolean closeResources, final OutputStream... os) throws IOException {
+    public static long pipeSynchronously(final InputStream is, boolean closeResources, final OutputStream... os) throws InterruptedException, IOException {
         return pipeSynchronously(is, 1024, closeResources, os);
     }
 
-    public static long pipeSynchronously(final InputStream is, int bufferSize, boolean closeResources, final OutputStream... os) throws IOException {
+    public static long pipeSynchronously(final InputStream is, int bufferSize, boolean closeResources, final OutputStream... os) throws InterruptedException, IOException {
         try {
             byte[] buffer = new byte[bufferSize];
             int r = -1;
             long read = 0;
             while ((r = is.read(buffer)) > 0) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
                 for (int i = 0; i < os.length; i++) {
                     if (os[i] != null) {
                         os[i].write(buffer, 0, r);
@@ -700,35 +703,29 @@ public final class Miscellaneous {
     }
 
     public static long getGlobalAutoIncremental(File file) throws IOException {
-        if (!file.exists()) {
-            createFile(file.getAbsolutePath());
-        }
-        RandomAccessFile raf = new RandomAccessFile(file, "rws");
-        FileLock lock = null;
-        long value = 0;
-        try {
-            while ((lock = raf.getChannel().tryLock()) == null) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
+        synchronized (file) {
+            if (!file.exists()) {
+                createFile(file.getAbsolutePath());
+            }
+            RandomAccessFile raf = new RandomAccessFile(file, "rws");
+            FileLock lock = raf.getChannel().lock();
+            long value;
+            try {
+                if (raf.length() == 0) {
+                    value = 1;
+                } else {
+                    value = raf.readLong() + 1;
                 }
+                raf.seek(0);
+                raf.writeLong(value);
+            } finally {
+                if (lock != null) {
+                    lock.release();
+                }
+                raf.close();
             }
-            if (raf.length() == 0) {
-                value = 0;
-            } else {
-                value = raf.readLong();
-            }
-            value++;
-            raf.seek(0);
-            raf.writeLong(value);
-        } finally {
-            if (lock != null) {
-                lock.release();
-            }
-            raf.close();
+            return value;
         }
-        return value;
     }
 
     public static String humanReadableByteCount(long bytes, boolean si) {

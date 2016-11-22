@@ -16,6 +16,7 @@
 package org.brutusin.commons.utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -69,7 +70,7 @@ public final class ProcessUtils {
             throw new ProcessException(sb.toString());
         }
     }
-    
+
     private static String getMessage(ByteArrayOutputStream baos) {
         String toString = baos.toString();
         if (toString == null) {
@@ -80,6 +81,30 @@ public final class ProcessUtils {
             return null;
         }
         return toString;
+    }
+
+    public static void createPOSIXNamedPipes(File... files) throws IOException {
+        try {
+            String[] mkfifo = new String[files.length + 1];
+            String[] chmod = new String[files.length + 2];
+            mkfifo[0] = "mkfifo";
+            chmod[0] = "chmod";
+            chmod[1] = "777";
+            for (int i = 0; i < files.length; i++) {
+                File f = files[i];
+                if (!f.getParentFile().exists()) {
+                    Miscellaneous.createDirectory(f.getParentFile());
+                }
+                mkfifo[i + 1] = f.getAbsolutePath();
+                chmod[i + 2] = f.getAbsolutePath();
+            }
+            Process p = Runtime.getRuntime().exec(mkfifo);
+            ProcessUtils.execute(p);
+            p = Runtime.getRuntime().exec(chmod);
+            ProcessUtils.execute(p);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
 }
