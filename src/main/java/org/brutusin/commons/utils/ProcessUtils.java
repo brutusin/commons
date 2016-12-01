@@ -18,6 +18,7 @@ package org.brutusin.commons.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  *
@@ -39,48 +40,26 @@ public final class ProcessUtils {
      * @throws InterruptedException
      */
     public static String[] execute(Process process) throws IOException, InterruptedException {
-        ByteArrayOutputStream outBaos = new ByteArrayOutputStream();
-        ByteArrayOutputStream errBaos = new ByteArrayOutputStream();
-        Thread stoutReaderThread = Miscellaneous.pipeAsynchronously(process.getInputStream(), outBaos);
-        Thread sterrReaderThread = Miscellaneous.pipeAsynchronously(process.getErrorStream(), errBaos);
+        String stdout;
+        String stderr;
         int code;
         try {
             code = process.waitFor();
+            stdout = Miscellaneous.toString(process.getInputStream(), "UTF-8");
+            stderr = Miscellaneous.toString(process.getErrorStream(), "UTF-8");
         } catch (InterruptedException ex) {
-            stoutReaderThread.interrupt();
-            sterrReaderThread.interrupt();
             process.destroy();
             throw ex;
-        } finally {
-            try {
-                stoutReaderThread.join();
-                sterrReaderThread.join();
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
         }
         if (code == 0) {
-            return new String[]{getMessage(outBaos), getMessage(errBaos)};
+            return new String[]{stdout, stderr};
         } else {
             StringBuilder sb = new StringBuilder("Process returned code: " + code + ".");
-            String stderr = getMessage(errBaos);
             if (stderr != null) {
-                sb.append("\n" + stderr);
+                sb.append("\n").append(stderr);
             }
             throw new ProcessException(sb.toString());
         }
-    }
-
-    private static String getMessage(ByteArrayOutputStream baos) {
-        String toString = baos.toString();
-        if (toString == null) {
-            return null;
-        }
-        toString = toString.trim();
-        if (toString.length() == 0) {
-            return null;
-        }
-        return toString;
     }
 
     public static void createPOSIXNamedPipes(File... files) throws IOException {
