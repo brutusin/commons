@@ -19,20 +19,20 @@ package org.brutusin.commons.utils;
  *
  * @author Ignacio del Valle Alles idelvall@brutusin.org
  */
-public class ProcessException extends RuntimeException{
+public class ProcessException extends Exception {
 
-    public ProcessException() {
+    private final int retCode;
+
+    public ProcessException(int retCode) {
+        this.retCode = retCode;
     }
 
-    public ProcessException(String message) {
+    public ProcessException(int retCode, String message) {
         super(message);
+        this.retCode = retCode;
     }
 
-    public ProcessException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ProcessException(Throwable cause) {
-        super(cause);
+    public int getRetCode() {
+        return retCode;
     }
 }

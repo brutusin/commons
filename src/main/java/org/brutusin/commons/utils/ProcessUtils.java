@@ -15,10 +15,9 @@
  */
 package org.brutusin.commons.utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.Map;
 
 /**
  *
@@ -29,40 +28,61 @@ public final class ProcessUtils {
     private ProcessUtils() {
     }
 
+    public static String executeProcess(String... command) throws ProcessException, InterruptedException {
+        return executeProcess(null, null, command);
+    }
+
+    public static String executeProcess(File workingFolder, String... command) throws ProcessException, InterruptedException {
+        return executeProcess(null, workingFolder, command);
+    }
+
     /**
      * Executes a native process with small stdout and stderr payloads
      *
-     * @param process
-     * @return an array of two elements containing stdout and stderr messages
-     * respectively
-     * @throws RuntimeException if the process return code is not 0
-     * @throws IOException
+     * @param env
+     * @param workingFolder
+     * @param command
+     * @return Merged stderr and stdout
+     * @throws ProcessException
      * @throws InterruptedException
      */
-    public static String[] execute(Process process) throws IOException, InterruptedException {
-        String stdout;
-        String stderr;
+    public static String executeProcess(Map<String, String> env, File workingFolder, String... command) throws ProcessException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        if (workingFolder != null) {
+            pb.directory(workingFolder);
+        }
+        if (env != null) {
+            pb.environment().clear();
+            pb.environment().putAll(env);
+        }
+        pb.redirectErrorStream(true);
         int code;
         try {
-            code = process.waitFor();
-            stdout = Miscellaneous.toString(process.getInputStream(), "UTF-8");
-            stderr = Miscellaneous.toString(process.getErrorStream(), "UTF-8");
-        } catch (InterruptedException ex) {
-            process.destroy();
-            throw ex;
-        }
-        if (code == 0) {
-            return new String[]{stdout, stderr};
-        } else {
-            StringBuilder sb = new StringBuilder("Process returned code: " + code + ".");
-            if (stderr != null) {
-                sb.append("\n").append(stderr);
+            Process process = pb.start();
+            String payload;
+            try {
+                code = process.waitFor();
+            } catch (InterruptedException ex) {
+                process.destroy();
+                throw ex;
             }
-            throw new ProcessException(sb.toString());
+            payload = Miscellaneous.toString(process.getInputStream(), "UTF-8");
+            if (code == 0) {
+                return payload;
+            } else {
+                StringBuilder sb = new StringBuilder("Process returned code: " + code + ".");
+                if (payload != null) {
+                    sb.append("\n").append(payload);
+                }
+                throw new ProcessException(code, sb.toString());
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
+
     }
 
-    public static void createPOSIXNamedPipes(File... files) throws IOException {
+    public static void createPOSIXNamedPipes(File... files) throws ProcessException, IOException {
         try {
             String[] mkfifo = new String[files.length + 1];
             String[] chmod = new String[files.length + 2];
@@ -77,10 +97,8 @@ public final class ProcessUtils {
                 mkfifo[i + 1] = f.getAbsolutePath();
                 chmod[i + 2] = f.getAbsolutePath();
             }
-            Process p = Runtime.getRuntime().exec(mkfifo);
-            ProcessUtils.execute(p);
-            p = Runtime.getRuntime().exec(chmod);
-            ProcessUtils.execute(p);
+            executeProcess(mkfifo);
+            executeProcess(chmod);
         } catch (InterruptedException ex) {
             throw new RuntimeException(ex);
         }
