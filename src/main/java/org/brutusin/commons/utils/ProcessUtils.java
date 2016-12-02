@@ -43,7 +43,7 @@ public final class ProcessUtils {
      * @param workingFolder
      * @param command
      * @return Merged stderr and stdout
-     * @throws ProcessException
+     * @throws ProcessException if process ret code is not 0
      * @throws InterruptedException
      */
     public static String executeProcess(Map<String, String> env, File workingFolder, String... command) throws ProcessException, InterruptedException {
