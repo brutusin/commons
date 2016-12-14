@@ -183,8 +183,8 @@ public final class Miscellaneous {
             return null;
         }
         ArrayList<T> ret = new ArrayList(elements.length);
-        for (int i = 0; i < elements.length; i++) {
-            ret.add(elements[i]);
+        for (T element : elements) {
+            ret.add(element);
         }
         return ret;
     }
@@ -331,7 +331,7 @@ public final class Miscellaneous {
         if (File.separatorChar == '\\') {
             return false;
         }
-        File fileInCanonicalDir = null;
+        File fileInCanonicalDir;
         if (file.getParent() == null) {
             fileInCanonicalDir = file;
         } else {
@@ -339,11 +339,7 @@ public final class Miscellaneous {
             fileInCanonicalDir = new File(canonicalDir, file.getName());
         }
 
-        if (fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile())) {
-            return false;
-        } else {
-            return true;
-        }
+        return !fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile());
     }
 
     /**
@@ -444,11 +440,13 @@ public final class Miscellaneous {
     }
 
     /**
-     * Asynchronous buffered writing from is to os. Finally closes inputstream.
+     * Asynchronous writing from is to os
      *
      * @param is
-     * @param logger
+     * @param errorHandler
+     * @param closeResources
      * @param os
+     * @return
      */
     public static Thread pipeAsynchronously(final InputStream is, final ErrorHandler errorHandler, final boolean closeResources, final OutputStream... os) {
         Thread t = new Thread() {
@@ -477,46 +475,43 @@ public final class Miscellaneous {
     }
 
     public static long pipeSynchronously(final InputStream is, final OutputStream... os) throws InterruptedException, IOException {
-        return pipeSynchronously(is, 1024, true, os);
+        return pipeSynchronously(is, true, os);
     }
 
     public static long pipeSynchronously(final InputStream is, boolean closeResources, final OutputStream... os) throws InterruptedException, IOException {
-        return pipeSynchronously(is, 1024, closeResources, os);
-    }
-
-    public static long pipeSynchronously(final InputStream is, int bufferSize, boolean closeResources, final OutputStream... os) throws InterruptedException, IOException {
         try {
-            byte[] buffer = new byte[bufferSize];
-            int r = -1;
             long read = 0;
-            while ((r = is.read(buffer)) > 0) {
+            int b;
+            while ((b = is.read()) > 0) {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
-                for (int i = 0; i < os.length; i++) {
-                    if (os[i] != null) {
-                        os[i].write(buffer, 0, r);
+                for (OutputStream o : os) {
+                    if (o != null) {
+                        o.write(b);
                     }
                 }
-                read += r;
-            }
-            for (int i = 0; i < os.length; i++) {
-                if (os[i] != null) {
-                    os[i].flush();
+                if (read > 0 && read % 1024 == 0) {
+                    for (OutputStream o : os) {
+                        if (o != null) {
+                            o.flush();
+                        }
+                    }
                 }
+                read++;
             }
             return read;
         } finally {
-            for (int i = 0; i < os.length; i++) {
-                if (os[i] != null) {
-                    os[i].flush();
+            for (OutputStream o : os) {
+                if (o != null) {
+                    o.flush();
                 }
             }
             if (closeResources) {
                 is.close();
-                for (int i = 0; i < os.length; i++) {
-                    if (os[i] != null) {
-                        os[i].close();
+                for (OutputStream o : os) {
+                    if (o != null) {
+                        o.close();
                     }
                 }
             }
@@ -533,26 +528,27 @@ public final class Miscellaneous {
         try {
             while ((line = br.readLine()) != null) {
                 lineCounter++;
-                for (int i = 0; i < os.length; i++) {
-                    if (os[i] != null) {
-                        synchronized (os[i]) {
-                            os[i].write((line + "\n").getBytes());
+                for (OutputStream o : os) {
+                    if (o != null) {
+                        synchronized (o) {
+                            o.write((line + "\n").getBytes());
+                            o.flush();
                         }
                     }
                 }
             }
             return lineCounter;
         } finally {
-            for (int i = 0; i < os.length; i++) {
-                if (os[i] != null) {
-                    os[i].flush();
+            for (OutputStream o : os) {
+                if (o != null) {
+                    o.flush();
                 }
             }
             if (closeResources) {
                 br.close();
-                for (int i = 0; i < os.length; i++) {
-                    if (os[i] != null) {
-                        os[i].close();
+                for (OutputStream o : os) {
+                    if (o != null) {
+                        o.close();
                     }
                 }
             }
@@ -579,21 +575,21 @@ public final class Miscellaneous {
         String[] tokens = path.split(separator);
         Stack<String> stk = new Stack<String>();
         boolean tokenPassed = false;
-        for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i].equals(".")) {
+        for (String token : tokens) {
+            if (token.equals(".")) {
                 continue;
             }
             if (tokenPassed) {
-                if (tokens[i].equals("..")) {
+                if (token.equals("..")) {
                     stk.pop();
                 } else {
-                    stk.add(tokens[i]);
+                    stk.add(token);
                 }
             } else {
-                if (!tokens[i].equals("..")) {
+                if (!token.equals("..")) {
                     tokenPassed = true;
                 }
-                stk.add(tokens[i]);
+                stk.add(token);
             }
         }
         StringBuilder sb = new StringBuilder();
